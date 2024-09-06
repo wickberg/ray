@@ -73,10 +73,10 @@ You may also see failures in the log like:
 The cause of this error may be the head node overloading with too many simultaneous
 connections. The solution for this problem is to start the worker nodes more slowly.
 
-Problems getting a SLURM cluster to work
+Problems getting a Slurm cluster to work
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A class of issues exist with starting Ray on SLURM clusters. While the exact causes aren't understood, (as of June 2023), some Ray
+A class of issues exist with starting Ray on Slurm clusters. While the exact causes aren't understood, (as of June 2023), some Ray
 improvements mitigate some of the resource contention. Some of the issues
 reported are as follows:
 
@@ -85,7 +85,7 @@ reported are as follows:
   issue is a `known OpenBLAS limitation`_. You can mitigate it by limiting OpenBLAS
   to one thread per process as explained in the link.
 
-* Resource allocation isn't as expected: usually the configuration has too many CPUs allocated per node. The best practice is to verify the SLURM configuration without
+* Resource allocation isn't as expected: usually the configuration has too many CPUs allocated per node. The best practice is to verify the Slurm configuration without
   starting Ray to verify that the allocations are as expected. For more
   detailed information see :ref:`ray-slurm-deploy`.
 

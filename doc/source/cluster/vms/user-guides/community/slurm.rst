@@ -5,27 +5,27 @@ Deploying on Slurm
 
 Slurm usage with Ray can be a little bit unintuitive.
 
-* SLURM requires multiple copies of the same program are submitted multiple times to the same cluster to do cluster programming. This is particularly well-suited for MPI-based workloads.
+* Slurm requires multiple copies of the same program are submitted multiple times to the same cluster to do cluster programming. This is particularly well-suited for MPI-based workloads.
 * Ray, on the other hand, expects a head-worker architecture with a single point of entry. That is, you'll need to start a Ray head node, multiple Ray worker nodes, and run your Ray script on the head node.
 
 .. warning::
 
-    SLURM support is still a work in progress. SLURM users should be aware
+    Slurm support is still a work in progress. Slurm users should be aware
     of current limitations regarding networking.
     See :ref:`here <slurm-network-ray>` for more explanations.
 
-    SLURM support is community-maintained. Maintainer GitHub handle: tupui.
+    Slurm support is community-maintained. Maintainer GitHub handle: tupui.
 
-This document aims to clarify how to run Ray on SLURM.
+This document aims to clarify how to run Ray on Slurm.
 
 .. contents::
   :local:
 
 
-Walkthrough using Ray with SLURM
+Walkthrough using Ray with Slurm
 --------------------------------
 
-Many SLURM deployments require you to interact with slurm via ``sbatch``, which executes a batch script on SLURM.
+Many Slurm deployments require you to interact with Slurm via ``sbatch``, which executes a batch script on Slurm.
 
 To run a Ray job with ``sbatch``, you will want to start a Ray cluster in the sbatch job with multiple ``srun`` commands (tasks), and then execute your python script that uses Ray. Each task will run on a separate node and start/connect to a Ray runtime.
 
@@ -45,14 +45,14 @@ See :ref:`slurm-basic.sh <slurm-basic>` for an end-to-end example.
 sbatch directives
 ~~~~~~~~~~~~~~~~~
 
-In your sbatch script, you'll want to add `directives to provide context <https://slurm.schedmd.com/sbatch.html>`__ for your job to SLURM.
+In your sbatch script, you'll want to add `directives to provide context <https://slurm.schedmd.com/sbatch.html>`__ for your job to Slurm.
 
 .. code-block:: bash
 
   #!/bin/bash
   #SBATCH --job-name=my-workload
 
-You'll need to tell SLURM to allocate nodes specifically for Ray. Ray will then find and manage all resources on each node.
+You'll need to tell Slurm to allocate nodes specifically for Ray. Ray will then find and manage all resources on each node.
 
 .. code-block:: bash
 
@@ -148,24 +148,24 @@ Finally, you can invoke your Python script:
    :start-after: __doc_script_start__
 
 
-.. note:: The -u argument tells python to print to stdout unbuffered, which is important with how slurm deals with rerouting output. If this argument is not included, you may get strange printing behavior such as printed statements not being logged by slurm until the program has terminated.
+.. note:: The -u argument tells python to print to stdout unbuffered, which is important with how Slurm deals with rerouting output. If this argument is not included, you may get strange printing behavior such as printed statements not being logged by Slurm until the program has terminated.
 
 .. _slurm-network-ray:
 
-SLURM networking caveats
+Slurm networking caveats
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are two important networking aspects to keep in mind when working with
-SLURM and Ray:
+Slurm and Ray:
 
 1. Ports binding.
 2. IP binding.
 
-One common use of a SLURM cluster is to have multiple users running concurrent
+One common use of a Slurm cluster is to have multiple users running concurrent
 jobs on the same infrastructure. This can easily conflict with Ray due to the
 way the head node communicates with its workers.
 
-Considering 2 users, if they both schedule a SLURM job using Ray
+Considering 2 users, if they both schedule a Slurm job using Ray
 at the same time, they are both creating a head node. In the backend, Ray will
 assign some internal ports to a few services. The issue is that as soon as the
 first head node is created, it will bind some ports and prevent them to be
@@ -222,10 +222,10 @@ network interfaces (`eth0`, `eth1`, etc.). Currently, it's difficult to
 set an internal IP
 (see the open `issue <https://github.com/ray-project/ray/issues/22732>`_).
 
-Python-interface SLURM scripts
+Python-interface Slurm scripts
 ------------------------------
 
-[Contributed by @pengzhenghao] Below, we provide a helper utility (:ref:`slurm-launch.py <slurm-launch>`) to auto-generate SLURM scripts and launch.
+[Contributed by @pengzhenghao] Below, we provide a helper utility (:ref:`slurm-launch.py <slurm-launch>`) to auto-generate Slurm scripts and launch.
 ``slurm-launch.py`` uses an underlying template (:ref:`slurm-template.sh <slurm-template>`) and fills out placeholders given user input.
 
 You can feel free to copy both files into your cluster for use. Feel free to also open any PRs for contributions to improve this script!
@@ -233,7 +233,7 @@ You can feel free to copy both files into your cluster for use. Feel free to als
 Usage example
 ~~~~~~~~~~~~~
 
-If you want to utilize a multi-node cluster in slurm:
+If you want to utilize a multi-node cluster in Slurm:
 
 .. code-block:: bash
 
@@ -264,17 +264,17 @@ Implementation
 Concretely, the (:ref:`slurm-launch.py <slurm-launch>`) does the following things:
 
 1. It automatically writes your requirements, e.g. number of CPUs, GPUs per node, the number of nodes and so on, to a sbatch script name ``{exp-name}_{date}-{time}.sh``. Your command (``--command``) to launch your own job is also written into the sbatch script.
-2. Then it will submit the sbatch script to slurm manager via a new process.
-3. Finally, the python process will terminate itself and leaves a log file named ``{exp-name}_{date}-{time}.log`` to record the progress of your submitted command. At the mean time, the ray cluster and your job is running in the slurm cluster.
+2. Then it will submit the sbatch script to Slurm manager via a new process.
+3. Finally, the python process will terminate itself and leaves a log file named ``{exp-name}_{date}-{time}.log`` to record the progress of your submitted command. At the mean time, the ray cluster and your job is running in the Slurm cluster.
 
 
 Examples and templates
 ----------------------
 
-Here are some community-contributed templates for using SLURM with Ray:
+Here are some community-contributed templates for using Slurm with Ray:
 
 - `Ray sbatch submission scripts`_ used at `NERSC <https://www.nersc.gov/>`_, a US national lab.
-- `YASPI`_ (yet another slurm python interface) by @albanie. The goal of yaspi is to provide an interface to submitting slurm jobs, thereby obviating the joys of sbatch files. It does so through recipes - these are collections of templates and rules for generating sbatch scripts. Supports job submissions for Ray.
+- `YASPI`_ (yet another slurm python interface) by @albanie. The goal of yaspi is to provide an interface to submitting Slurm jobs, thereby obviating the joys of sbatch files. It does so through recipes - these are collections of templates and rules for generating sbatch scripts. Supports job submissions for Ray.
 
 - `Convenient python interface`_ to launch ray cluster and submit task by @pengzhenghao
 
